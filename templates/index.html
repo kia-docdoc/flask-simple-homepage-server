@@ -1,0 +1,207 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Le Babadoc</title>
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap">
+	<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+	<style>
+		body {
+			font-family: 'Poppins', sans-serif;
+			background-color: #f2f2f2; /* Light gray background */
+			margin: 0;
+			padding: 0;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			min-height: 100vh;
+		}
+
+		h1 {
+			color: #4e7b8a; /* Subtle blue to complement subdomains */
+			text-align: center;
+			margin: 20px 0;
+			font-size: 2em;
+			padding-top: 20px; /* Edit for mobile */
+			text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+		}
+
+		ul {
+			list-style-type: none;
+			padding: 0;
+			margin-top: 0px;
+			display: flex;
+			flex-wrap: wrap;
+			justify-content: space-around;
+			max-width: 600px;
+			margin-bottom: 10%;
+		}
+
+		li {
+			background-color: #e0e0e0; /* Light gray for list items */
+			border-radius: 8px;
+			box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+			margin: 0px;
+			margin-top: 30px;
+			padding: 10px;
+			width: 45%;
+			box-sizing: border-box;
+			text-align: center; /* Center the content */
+			transition: transform 0.3s ease; /* Add transform transition */
+		}
+
+		li:hover {
+			transform: scale(1.05); /* Enlarge on hover */
+		}
+
+		h2 {
+			color: #333;
+			margin-bottom: 10px;
+			font-weight: 700; /* Bold font weight */
+		}
+		
+		h3 {
+			color: #666;
+			font-size: 85%;
+			bottom: 0;
+			left: 50%;
+			position: fixed;
+			transform: translateX(-50%);
+			background-color: #f2f2f2; /* White background to separate from content */
+			padding: 10px;
+			width: 100%;
+			text-align: center;
+			margin-bottom: 0;
+		}
+
+		p {
+			color: #666;
+			margin-bottom: 15px;
+		}
+
+		a {
+			color: #4e7b8a; /* Subtle blue for links */
+			text-decoration: none;
+			font-weight: bold;
+			transition: color 0.3s ease; /* Smooth color transition */
+		}
+
+		a:hover {
+			color: #315365; /* Darker blue on hover */
+		}
+
+		/* Modal container */
+		.modal {
+			display: none;
+			position: fixed;
+			z-index: 1000;
+			left: 0;
+			top: 0;
+			width: 100%;
+			height: 100%;
+			background-color: rgba(0, 0, 0, 0.5);
+			justify-content: center;
+			align-items: center;
+		}
+
+		/* Modal content */
+		.modal-content {
+			background-color: #fff;
+			border-radius: 10px;
+			padding: 20px;
+			width: 90%;
+			max-width: 400px;
+			box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+			text-align: center;
+			position: relative;
+			animation: slide-down 0.3s ease-out;
+		}
+
+		/* Close button */
+		.close-button {
+			position: absolute;
+			top: 10px;
+			right: 15px;
+			font-size: 18px;
+			font-weight: bold;
+			color: #333;
+			cursor: pointer;
+		}
+
+		.close-button:hover {
+			color: #000;
+		}
+
+		/* Animation for modal appearance */
+		@keyframes slide-down {
+			from {
+				transform: translateY(-50px);
+				opacity: 0;
+			}
+			to {
+				transform: translateY(0);
+				opacity: 1;
+			}
+		}
+
+		/* Media query for mobile devices */
+		@media (max-width: 600px) {
+			li {
+				width: 88%; /* Display in a single column on small screens */
+			}
+			
+			ul {
+				margin-top: 0px;
+				margin-bottom: 20%;
+			}
+		}
+	</style>
+</head>
+<body>
+	<h1>Hello Nerd</h1>
+	<ul>
+		{% for subdomain in subdomains %}
+			<li>
+				<h2><a href="{{ subdomain['url'] }}" target="_blank"
+					{% if subdomain['name'] in ['Media Center', 'Download Server'] %}
+						onclick="showAlert(event, '{{ subdomain['url'] }}', '{{ subdomain['name'] }}')"
+					{% endif %}
+				>{{ subdomain['name'] }}</a></h2>
+				<p>{{ subdomain['description'] }}</p>
+			</li>
+		{% endfor %}
+	</ul>
+	<h3>Don't hack me, you have nothing to prove!</h3>
+
+	<!-- Modal Alert -->
+	<div id="customAlert" class="modal">
+		<div class="modal-content">
+			<span class="close-button" onclick="closeAlert()">&times;</span>
+			<p id="alertMessage"></p>
+			<button id="proceedButton" style="margin-top: 20px; padding: 10px 20px; background: #4e7b8a; color: white; border: none; border-radius: 5px; cursor: pointer;">
+				Proceed
+			</button>
+		</div>
+	</div>
+
+	<script>
+		// Show custom alert and prevent default link behavior
+		function showAlert(event, url, subdomainName) {
+			event.preventDefault(); // Prevent link from opening immediately
+			const alertMessage = `To manage bandwidth limitations, ${subdomainName} is accessible exclusively via IPv6.`;
+			document.getElementById('alertMessage').textContent = alertMessage;
+			document.getElementById('proceedButton').onclick = function () {
+				window.open(url, '_blank'); // Open the link in a new tab
+				closeAlert();
+			};
+			document.getElementById('customAlert').style.display = 'flex'; // Show the modal
+		}
+
+		// Close the custom alert
+		function closeAlert() {
+			document.getElementById('customAlert').style.display = 'none'; // Hide the modal
+		}
+	</script>
+</html>

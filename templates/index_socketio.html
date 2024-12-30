@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subdomain Status</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8sh+Wy2n0B06Ck1FO0YxmPnYb1jxQ5st5nL9lN" crossorigin="anonymous">
+    <style>
+        .status-circle {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
+        }
+        .active-circle {
+            background-color: green;
+        }
+        .inactive-circle {
+            background-color: red;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="mb-4">Subdomain Status</h1>
+        <table class="table" id="status-table">
+            <thead>
+                <tr>
+                    <th scope="col">Subdomain</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Visit</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if subdomain_statuses %}
+                    {% for subdomain, status in subdomain_statuses.items() %}
+                        <tr>
+                            <td>{{ subdomain }}</td>
+                            <td>
+                                <span class="status-circle {% if status == 'Active' %}active-circle{% else %}inactive-circle{% endif %}" data-subdomain="{{ subdomain }}"></span>
+                            </td>
+                            <td><a href="{{ subdomains[subdomain] }}" target="_blank" class="btn btn-primary">Visit</a></td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="3">Loading...</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.2/socket.io.js"></script>
+    <script>
+        var socket = io.connect('http://' + document.domain + ':' + location.port);
+
+        socket.on('update_statuses', function(data) {
+            $('#status-table tbody').empty();
+            if (Object.keys(data).length === 0) {
+                $('#status-table tbody').append('<tr><td colspan="3">No data available</td></tr>');
+            } else {
+                Object.keys(data).forEach(function(subdomain) {
+                    var status = data[subdomain];
+                    var statusCircle = $('<span></span>').addClass('status-circle').addClass(status === 'Active' ? 'active-circle' : 'inactive-circle').attr('data-subdomain', subdomain);
+                    var row = $('<tr></tr>').append($('<td></td>').text(subdomain)).append($('<td></td>').append(statusCircle)).append($('<td></td>').append($('<a></a>').attr('href', subdomains[subdomain]).attr('target', '_blank').addClass('btn btn-primary').text('Visit')));
+                    $('#status-table tbody').append(row);
+                });
+            }
+        });
+    </script>
+</body>
+</html>
